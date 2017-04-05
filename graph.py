@@ -46,14 +46,12 @@ class Graph(object):
 
 			return neighbor_and_weights
 
+	def get_neighbor_objects_of_a_node(self, node_id):
+		neighbor_objects = []
+		if node_id not in self.graph:
+			print "node does not exist"
+		else:
+			for neighbor_node_id in self.graph[node_id].neighbors:
+				neighbor_objects.append(self.graph[neighbor_node_id])
 
-node_ids = [1, 2, 3, 4]
-weights = [10, 20, 30, 40]
-
-graph = Graph(node_ids, weights)
-
-connections = [(1, 2), (2, 3), (3, 1), (1, 4), (3, 4)]
-
-graph.add_connections(connections)
-
-print graph.get_neighbors_and_weights_of_a_node(4)
+			return neighbor_objects
