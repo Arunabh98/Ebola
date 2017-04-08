@@ -136,35 +136,40 @@ class Graph(object):
                 self.graph[node_id].make_infected()
 
 
-
-
 # Tutorial
 node_ids = [1, 2, 3, 4, 5]
 weights = [10, 20, 30, 40, 50]
 
-# initialize a graph
+# initialize a graph - the first infected node is randomly chosen.
 graph = Graph(node_ids, weights)
 
-print graph.get_infected_nodes()
+# get the id of the first infected node.
+first_infected_node = graph.get_infected_nodes()[0]
+print first_infected_node
 
-# connections given
+# connections between nodes
 connections = [(1, 2), (2, 3), (3, 4), (1, 3), (1, 5), (2, 5)]
 
 # create connections
 graph.add_connections(connections)
 
+# get the ids of the nodes which will be infected in the next turn
+# graph.get_nodes_that_will_be_infected_in_next_step() returns the objects
+# of the nodes that will be infected.
 print [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
-graph.play_one_step(1)
+
+# out of the list of node ids returned above, we choose one node to vaccinate.
+# Chinu, Darshan will write the algo here.
+# For now choosing 1 if it is not the first infected node. If it is, choosing 2.
+# play_one_step will first vaccinate the given node id and then the infection will
+# spread to the neighboring nodes.
+if first_infected_node != 1:
+    graph.play_one_step(1)
+else:
+    graph.play_one_step(2)
+
+# get the nodes infected after above step.
 print graph.get_infected_nodes()
+
+# now which nodes will be effected. We have to choose one out of these to vaccinate.
 print [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
-
-# get the neighbors of node 1 along with weights
-# returns {2: 20, 3: 30}
-print graph.get_neighbors_and_weights_of_a_node(1)
-
-# get the neighbor objects of node 2
-neighbor_objects = graph.get_neighbor_objects_of_a_node(2)
-
-# print the ids of the nodes connected to 2
-# returns [1, 3]
-print [x.id for x in neighbor_objects]
