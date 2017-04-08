@@ -8,6 +8,9 @@ class Node(object):
         self.vaccinated = vaccinated
         self.neighbors = set()
 
+    def get_weight(self):
+        return self.weight
+
     def add_neighbor(self, node_id):
         self.neighbors.add(node_id)
 
@@ -67,6 +70,13 @@ class Graph(object):
         else:
             self.graph[node_1_id].add_neighbor(node_2_id)
             self.graph[node_2_id].add_neighbor(node_1_id)
+
+    def get_sum_of_weights_of_all_infected_nodes(self):
+        infected_sum = 0
+        for infected_node_id in self.infected_node_ids:
+            infected_sum = infected_sum + self.graph[infected_node_id].get_weight()
+
+        return infected_sum
 
     def get_neighbors_and_weights_of_a_node(self, node_id):
         neighbor_and_weights = {}
@@ -145,7 +155,7 @@ graph = Graph(node_ids, weights)
 
 # get the id of the first infected node.
 first_infected_node = graph.get_infected_nodes()[0]
-print first_infected_node
+print "First infected node: ", first_infected_node
 
 # connections between nodes
 connections = [(1, 2), (2, 3), (3, 4), (1, 3), (1, 5), (2, 5)]
@@ -156,7 +166,7 @@ graph.add_connections(connections)
 # get the ids of the nodes which will be infected in the next turn
 # graph.get_nodes_that_will_be_infected_in_next_step() returns the objects
 # of the nodes that will be infected.
-print [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
+print "Nodes that will be infected: ", [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
 
 # out of the list of node ids returned above, we choose one node to vaccinate.
 # Chinu, Darshan will write the algo here.
@@ -164,12 +174,17 @@ print [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step
 # play_one_step will first vaccinate the given node id and then the infection will
 # spread to the neighboring nodes.
 if first_infected_node != 1:
+    print "Vaccinate node 1"
     graph.play_one_step(1)
 else:
+    print "Vaccinate node 2"
     graph.play_one_step(2)
 
 # get the nodes infected after above step.
-print graph.get_infected_nodes()
+print "Nodes infected after first step: ", graph.get_infected_nodes()
+
+# get the sum of weights of infected nodes.
+print "Sum of weights of infected nodes: ", graph.get_sum_of_weights_of_all_infected_nodes()
 
 # now which nodes will be effected. We have to choose one out of these to vaccinate.
-print [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
+print "Nodes that will be affected in the second step: ", [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
