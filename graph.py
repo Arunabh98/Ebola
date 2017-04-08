@@ -1,18 +1,42 @@
 class Node(object):
-	def __init__(self, node_id, weight, ebola_infected = False):
+	def __init__(self, node_id, weight, ebola_infected = False, vaccinated = False):
 		self.id = node_id;
 		self.weight = weight
 		self.ebola_infected = ebola_infected
+		self.vaccinated = vaccinated
 		self.neighbors = set()
 
 	def add_neighbor(self, node_id):
 		self.neighbors.add(node_id)
+
+	def is_infected(self):
+		return self.ebola_infected
+
+	def is_vaccinated(self):
+		return self.vaccinated
+
+	def make_infected(self):
+		if self.ebola_infected == True:
+			print "node already infected"
+		else:
+			self.ebola_infected = True
+
+	def get_neighbor_node_ids(self):
+		return self.neighbors
+
+	def vaccinate_node(self):
+		if self.vaccinated == True:
+			print "node already vaccinated"
+		else:
+			self.vaccinated = True
 
 
 class Graph(object):
 	def __init__(self, node_ids, weights):
 		# structure of graph {node_id: node_object, ...}
 		self.graph = {}
+		self.infected_node_ids = []
+		self.vaccinated_node_ids = []
 		self.add_nodes(node_ids, weights)
 
 	def add_nodes(self, node_ids, weights):
@@ -42,7 +66,7 @@ class Graph(object):
 		if node_id not in self.graph:
 			print "node does not exist"
 		else:
-			for neighbor_node_id in self.graph[node_id].neighbors:
+			for neighbor_node_id in self.graph[node_id].get_neighbor_node_ids():
 				neighbor_and_weights[neighbor_node_id] = self.graph[neighbor_node_id].weight
 
 			return neighbor_and_weights
@@ -52,10 +76,17 @@ class Graph(object):
 		if node_id not in self.graph:
 			print "node does not exist"
 		else:
-			for neighbor_node_id in self.graph[node_id].neighbors:
+			for neighbor_node_id in self.graph[node_id].get_neighbor_node_ids():
 				neighbor_objects.append(self.graph[neighbor_node_id])
 
 			return neighbor_objects
+
+	def vaccinate_node(self, node_id):
+		if node_id not in self.graph:
+			print "node does not exist"
+		else:
+			graph[node_id].vaccinate_node()
+
 
 
 # Tutorial
