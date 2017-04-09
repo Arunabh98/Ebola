@@ -83,7 +83,13 @@ class Graph(object):
             infected_sum = infected_sum + self.graph[infected_node_id].get_weight()
 
         return infected_sum
-    
+    def get_sum_of_weights_of_all_healthy_nodes(self):
+    	healthy_sum =0 
+    	for id in self.graph.keys():
+    		if  not self.graph[id].is_infected():
+    			healthy_sum = healthy_sum + self.graph[id].get_weight()
+    	return healthy_sum		
+
     def get_sum_of_weights_of_neighbouring_neutral_nodes(self, node_1_id):
     	neutral_neighbor_ids = self.get_neutral_neighbor_ids_of_a_node(node_1_id)
     	weighted_sum = 0
@@ -206,17 +212,21 @@ print "sum of weights of neighbours of first infected node", graph.get_sum_of_we
 print graph.node_to_vaccinate()
 
 # ------------- ADD THE WHILE LOOP HERE, AFTER THE CONNECTIONS---------------
-"""
-    while (graph.game_over is not 1):
-    	id = graph.node_to_vaccinate()
-    	graph.play_one_step(id)
-    print "sum of all infected nodes", graph.get_sum_of_weights_of_all_infected_nodes()	
+while (len(graph.get_nodes_that_will_be_infected_in_next_step())):
+    print graph.propagator_nodes
+    id = graph.node_to_vaccinate()
+    print "node to vaccinate", id
+    graph.play_one_step(id)
+    print "sum of all healthy nodes", graph.get_sum_of_weights_of_all_healthy_nodes()	
+
+print "game over, your score is", graph.get_sum_of_weights_of_all_healthy_nodes()
+ 
  # You can also print the sum of neutral nodes in the graph
-"""  
+
 # get the ids of the nodes which will be infected in the next turn
 # graph.get_nodes_that_will_be_infected_in_next_step() returns the objects
 # of the nodes that will be infected.
-print "Nodes that will be infected: ", [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
+"""print "Nodes that will be infected: ", [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
 
 
 
@@ -243,4 +253,4 @@ print "Sum of weights of infected nodes: ", graph.get_sum_of_weights_of_all_infe
 
 # now which nodes will be effected. We have to choose one out of these to vaccinate.
 print "Nodes that will be affected in the second step: ", [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
-print graph.game_over
+"""
