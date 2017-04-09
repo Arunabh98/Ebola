@@ -172,7 +172,7 @@ class Graph(object):
     		node_l1 = self.get_neutral_neighbor_ids_of_a_node(node_id)
     		for node_id_l1 in node_l1:
 			    if (max_sum_weight<self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1)):
-    				max_sum_weight = self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1)
+    				max_sum_weight = self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1) +self.graph[node_id_l1].get_weight()
     				node_vaccinate = node_id_l1
 
     	return node_vaccinate 		    
@@ -205,6 +205,14 @@ graph.add_connections(connections)
 print "sum of weights of neighbours of first infected node", graph.get_sum_of_weights_of_neighbouring_neutral_nodes(first_infected_node)
 print graph.node_to_vaccinate()
 
+# ------------- ADD THE WHILE LOOP HERE, AFTER THE CONNECTIONS---------------
+"""
+    while (graph.game_over is not 1):
+    	id = graph.node_to_vaccinate()
+    	graph.play_one_step(id)
+    print "sum of all infected nodes", graph.get_sum_of_weights_of_all_infected_nodes()	
+ # You can also print the sum of neutral nodes in the graph
+"""  
 # get the ids of the nodes which will be infected in the next turn
 # graph.get_nodes_that_will_be_infected_in_next_step() returns the objects
 # of the nodes that will be infected.
@@ -221,6 +229,7 @@ print "Nodes that will be infected: ", [node_id for node_id in graph.get_nodes_t
 if first_infected_node != 1:
     print "Vaccinate node 1"
     graph.play_one_step(1)
+    print "vaccinated status of node 1:", graph.graph[1].vaccinated
 else:
     print "Vaccinate node 2"
     graph.play_one_step(2)
