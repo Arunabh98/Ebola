@@ -159,7 +159,7 @@ class Graph(object):
         self.propagator_nodes = nodes_about_to_be_infected
 
         for node_id in nodes_about_to_be_infected:
-            if node_id not in self.infected_node_ids:
+            if node_id not in self.infected_node_ids and node_id not in self.vaccinated_node_ids:
                 self.infected_node_ids.append(node_id)
                 self.graph[node_id].make_infected()
 
