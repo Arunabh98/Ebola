@@ -177,7 +177,7 @@ class Graph(object):
     	for node_id in self.propagator_nodes:
     		node_l1 = self.get_neutral_neighbor_ids_of_a_node(node_id)
     		for node_id_l1 in node_l1:
-			    if (max_sum_weight<self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1)):
+			    if (max_sum_weight<self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1)) + self.graph[node_id_l1].get_weight():
     				max_sum_weight = self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1) +self.graph[node_id_l1].get_weight()
     				node_vaccinate = node_id_l1
 
@@ -194,7 +194,7 @@ class Graph(object):
 # Tutorial
 node_ids = [1, 2, 3, 4, 5]
 weights = [10, 20, 30, 40, 50]
-
+i = 1
 # initialize a graph - the first infected node is randomly chosen.
 graph = Graph(node_ids, weights)
 
@@ -209,17 +209,20 @@ connections = [(1, 2), (2, 3), (3, 4), (1, 3), (1, 5), (2, 5)]
 # create connections
 graph.add_connections(connections)
 print "sum of weights of neighbours of first infected node", graph.get_sum_of_weights_of_neighbouring_neutral_nodes(first_infected_node)
-print graph.node_to_vaccinate()
-
+print "loop starting now..."
+print '\n' 
 # ------------- ADD THE WHILE LOOP HERE, AFTER THE CONNECTIONS---------------
 while (len(graph.get_nodes_that_will_be_infected_in_next_step())):
-    print graph.propagator_nodes
+    print "step", i
+    i = i+1 
+    print "Propagator nodes :",graph.propagator_nodes
     id = graph.node_to_vaccinate()
-    print "node to vaccinate", id
+    print "node to vaccinate :", id
     graph.play_one_step(id)
-    print "sum of all healthy nodes", graph.get_sum_of_weights_of_all_healthy_nodes()	
-
-print "game over, your score is", graph.get_sum_of_weights_of_all_healthy_nodes()
+    print "sum of all healthy nodes after vaccination and infection:", graph.get_sum_of_weights_of_all_healthy_nodes()	
+    
+    
+print "\n game over, your score is", graph.get_sum_of_weights_of_all_healthy_nodes()
  
  # You can also print the sum of neutral nodes in the graph
 
