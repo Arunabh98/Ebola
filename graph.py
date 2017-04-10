@@ -230,7 +230,7 @@ while (len(graph.get_nodes_that_will_be_infected_in_next_step())):
     print "Propagator nodes :",graph.propagator_nodes
     print "infected nodes :" , graph.infected_node_ids
     id = graph.node_to_vaccinate()
-    color_map = []
+    color_map = []                     #updating color map at each step of the loop
     for x in graph.graph.keys():
         if graph.graph[x].is_infected():
             color_map.append('red')
