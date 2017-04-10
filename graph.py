@@ -1,4 +1,7 @@
 import random
+import networkx as nx 
+import matplotlib.pyplot as plt 
+import time 
 
 class Node(object):
     def __init__(self, node_id, weight, ebola_infected = False, vaccinated = False):
@@ -191,10 +194,11 @@ class Graph(object):
 
 
 
-# Tutorial
+# assigning node ids, weights and iterator variable for while loop
 node_ids = [1, 2, 3, 4, 5]
 weights = [10, 20, 30, 40, 50]
 i = 1
+
 # initialize a graph - the first infected node is randomly chosen.
 graph = Graph(node_ids, weights)
 
@@ -205,25 +209,41 @@ print "First infected node: ", first_infected_node
 #print "neutral neighbours ids", sum1
 # connections between nodes
 connections = [(1, 2), (2, 3), (3, 4), (1, 3), (1, 5), (2, 5)]
-
 # create connections
 graph.add_connections(connections)
+#initializing the graph to draw
+g = nx.Graph()
+g.add_nodes_from(node_ids)
+g.add_edges_from(connections)
+#specifyin layout of appearence of nodes
+graph_pos = nx.shell_layout(g)
+# creating the graph to draw, adding edges and nodes (all blue) with initial edge conditions
+nx.draw(g,graph_pos,with_labels=True,node_color='blue',node_size=500)
+plt.show()
 print "sum of weights of neighbours of first infected node", graph.get_sum_of_weights_of_neighbouring_neutral_nodes(first_infected_node)
-print "loop starting now..."
+print "loop starting now... to proceed in the loop, close images after viewing them"
 print '\n' 
 # ------------- ADD THE WHILE LOOP HERE, AFTER THE CONNECTIONS---------------
 while (len(graph.get_nodes_that_will_be_infected_in_next_step())):
     print "step", i
     i = i+1 
     print "Propagator nodes :",graph.propagator_nodes
+    print "infected nodes :" , graph.infected_node_ids
     id = graph.node_to_vaccinate()
+    color_map = []
+    for x in graph.graph.keys():
+        if graph.graph[x].is_infected():
+            color_map.append('red')
+        else:
+            color_map.append('green')    
     print "node to vaccinate :", id
+    
+    nx.draw(g,graph_pos,node_color=color_map,with_labels=True, node_size=500)
+    plt.show()
+    print "sum of all healthy nodes before infection:", graph.get_sum_of_weights_of_all_healthy_nodes()	
     graph.play_one_step(id)
-    print "sum of all healthy nodes after vaccination and infection:", graph.get_sum_of_weights_of_all_healthy_nodes()	
-    
-    
 print "\n game over, your score is", graph.get_sum_of_weights_of_all_healthy_nodes()
- 
+
  # You can also print the sum of neutral nodes in the graph
 
 # get the ids of the nodes which will be infected in the next turn
