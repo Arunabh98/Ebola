@@ -131,23 +131,24 @@ class Graph(object):
             self.game_over = 1
         return nodes_that_will_be_infected
 
-    def play_one_step(self, vaccinate_node_id):
+    def play_one_step(self, vaccinate_node_id = None):
         """One step of the game proceeds. The node id given is vaccinated
         and the infection spreads to all the neighboring nodes."""
 
         nodes_about_to_be_infected = []
-        self.vaccinate_node(vaccinate_node_id)
-        for infected_node_id in self.infected_node_ids:
-            neutral_neighbor_ids = self.get_neutral_neighbor_ids_of_a_node(infected_node_id)
-            for neutral_neighbor_node_id in neutral_neighbor_ids:
-                if neutral_neighbor_node_id not in nodes_about_to_be_infected:
-                    nodes_about_to_be_infected.append(neutral_neighbor_node_id)
-        self.propagator_nodes = nodes_about_to_be_infected
+        if vaccinate_node_id:
+            self.vaccinate_node(vaccinate_node_id)
+            for infected_node_id in self.infected_node_ids:
+                neutral_neighbor_ids = self.get_neutral_neighbor_ids_of_a_node(infected_node_id)
+                for neutral_neighbor_node_id in neutral_neighbor_ids:
+                    if neutral_neighbor_node_id not in nodes_about_to_be_infected:
+                        nodes_about_to_be_infected.append(neutral_neighbor_node_id)
+            self.propagator_nodes = nodes_about_to_be_infected
 
-        for node_id in nodes_about_to_be_infected:
-            if node_id not in self.infected_node_ids and node_id not in self.vaccinated_node_ids:
-                self.infected_node_ids.append(node_id)
-                self.graph[node_id].make_infected()
+            for node_id in nodes_about_to_be_infected:
+                if node_id not in self.infected_node_ids and node_id not in self.vaccinated_node_ids:
+                    self.infected_node_ids.append(node_id)
+                    self.graph[node_id].make_infected()
 
     def node_to_vaccinate_alternate(self):
         temporary_graph = copy.deepcopy(self)
@@ -177,9 +178,8 @@ class Graph(object):
         return node_vaccinate
 
 # assigning node ids, weights and start of game play.
-node_ids = [1, 2, 3, 4, 5]
-weights = [10, 20, 30, 40, 30]
-i = 1
+node_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+weights = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150]
 
 # initialize a graph - the first infected node is randomly chosen.
 graph = Graph(node_ids, weights)
@@ -190,7 +190,7 @@ first_infected_node = graph.get_infected_nodes()[0]
 print "First infected node: ", first_infected_node
 
 # connections between nodes
-connections = [(1, 3), (2, 3), (3, 4), (4, 5)]
+connections = [(3, 14), (12, 13), (12, 2), (10, 10), (10, 14), (13, 10), (4, 1), (13, 4), (12, 4), (9, 4), (13, 2), (12, 7), (9, 14), (12, 10), (4, 14), (12, 8), (4, 9), (6, 2), (10, 5), (6, 8)]
 
 # create connections
 graph.add_connections(connections)
@@ -212,7 +212,6 @@ print '\n'
 
 # Start game play.
 while (len(graph.get_nodes_that_will_be_infected_in_next_step())):
-    i = i+1 
     # id = graph.node_to_vaccinate()
     id = graph.node_to_vaccinate_alternate()[0]
     color_map = []                     #updating color map at each step of the loop
@@ -228,4 +227,13 @@ while (len(graph.get_nodes_that_will_be_infected_in_next_step())):
     plt.show()
     graph.play_one_step(id)
 
+graph.play_one_step()
+color_map = []
+for x in graph.graph.keys():
+    if graph.graph[x].is_infected():
+        color_map.append('red')
+    else:
+        color_map.append('green')
+nx.draw(g,graph_pos,node_color=color_map,with_labels=True, node_size=500)
+plt.show()
 print "Sum of weights of healthy nodes saved:", graph.get_sum_of_weights_of_all_healthy_nodes()
