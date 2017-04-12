@@ -1,7 +1,7 @@
 import random
 import networkx as nx 
 import matplotlib.pyplot as plt 
-import time 
+import copy
 
 class Node(object):
     def __init__(self, node_id, weight, ebola_infected = False, vaccinated = False):
@@ -134,8 +134,7 @@ class Graph(object):
     def play_one_step(self, vaccinate_node_id):
         """One step of the game proceeds. The node id given is vaccinated
         and the infection spreads to all the neighboring nodes."""
-        """ I think we can club the functionality used here, with the function node_to_vaccinate,
-        as no point in defining to redundant functions - chinu"""
+
         nodes_about_to_be_infected = []
         self.vaccinate_node(vaccinate_node_id)
         for infected_node_id in self.infected_node_ids:
@@ -149,6 +148,21 @@ class Graph(object):
             if node_id not in self.infected_node_ids and node_id not in self.vaccinated_node_ids:
                 self.infected_node_ids.append(node_id)
                 self.graph[node_id].make_infected()
+
+    def node_to_vaccinate_alternate(self):
+        temporary_graph = copy.deepcopy(self)
+        values = {}
+        nodes_that_will_be_infected = temporary_graph.get_nodes_that_will_be_infected_in_next_step()
+        if len(nodes_that_will_be_infected) == 0:
+            return None, temporary_graph.get_sum_of_weights_of_all_healthy_nodes()
+        else:
+            for node_id in nodes_that_will_be_infected:
+                temporary_graph.play_one_step(node_id)
+                next_node_to_save, values[node_id] = temporary_graph.node_to_vaccinate_alternate()
+                temporary_graph = copy.deepcopy(self)
+
+            max_value_key = max(values, key=values.get)
+            return max_value_key, values[max_value_key]
     
     def node_to_vaccinate(self):
         max_sum_weight = 0
@@ -156,7 +170,7 @@ class Graph(object):
         for node_id in self.propagator_nodes:
             node_l1 = self.get_neutral_neighbor_ids_of_a_node(node_id)
             for node_id_l1 in node_l1:
-                if (max_sum_weight<self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1)) + self.graph[node_id_l1].get_weight():
+                if (max_sum_weight< self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1)) + self.graph[node_id_l1].get_weight():
                     max_sum_weight = self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1) +self.graph[node_id_l1].get_weight()
                     node_vaccinate = node_id_l1
 
@@ -199,7 +213,8 @@ print '\n'
 # Start game play.
 while (len(graph.get_nodes_that_will_be_infected_in_next_step())):
     i = i+1 
-    id = graph.node_to_vaccinate()
+    # id = graph.node_to_vaccinate()
+    id = graph.node_to_vaccinate_alternate()[0]
     color_map = []                     #updating color map at each step of the loop
     for x in graph.graph.keys():
         if graph.graph[x].is_infected():
