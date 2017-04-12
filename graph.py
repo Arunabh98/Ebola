@@ -27,7 +27,7 @@ class Node(object):
         if self.ebola_infected : 
             print "node already infected"
         elif self.vaccinated :
-        	print "node already vaccinated"
+            print "node already vaccinated"
         else:
             self.ebola_infected = True
 
@@ -38,13 +38,13 @@ class Node(object):
         if self.vaccinated:
             print "node already vaccinated"
         elif self.ebola_infected:
-        	print "node already infected"
+            print "node already infected"
         else:
             self.vaccinated = True
 
 
 class Graph(object):
-    def __init__(self, node_ids, weights):
+    def __init__(self, node_ids, weights, gane_over = 0):
         # structure of graph {node_id: node_object, ...}
         self.graph = {}
         self.vaccinated_node_ids = []
@@ -52,7 +52,6 @@ class Graph(object):
         first_infected_node_id = random.choice(self.graph.keys())
         self.graph[first_infected_node_id].make_infected()
         self.infected_node_ids = [first_infected_node_id]
-        self.game_over = 0 
         self.propagator_nodes =[first_infected_node_id]
 
     def add_nodes(self, node_ids, weights):
@@ -66,9 +65,6 @@ class Graph(object):
             new_node = Node(node_id, weight)
             self.graph[node_id] = new_node
 
-    def get_infected_nodes(self):
-        return self.infected_node_ids
-
     def add_connections(self, connections):
         for node_1_id, node_2_id in connections:
             self.add_connection(node_1_id, node_2_id)
@@ -80,6 +76,9 @@ class Graph(object):
             self.graph[node_1_id].add_neighbor(node_2_id)
             self.graph[node_2_id].add_neighbor(node_1_id)
 
+    def get_infected_nodes(self):
+        return self.infected_node_ids
+
     def get_sum_of_weights_of_all_infected_nodes(self):
         infected_sum = 0
         for infected_node_id in self.infected_node_ids:
@@ -87,39 +86,18 @@ class Graph(object):
 
         return infected_sum
     def get_sum_of_weights_of_all_healthy_nodes(self):
-    	healthy_sum =0 
-    	for id in self.graph.keys():
-    		if  not self.graph[id].is_infected():
-    			healthy_sum = healthy_sum + self.graph[id].get_weight()
-    	return healthy_sum		
+        healthy_sum =0 
+        for id in self.graph.keys():
+            if  not self.graph[id].is_infected():
+                healthy_sum = healthy_sum + self.graph[id].get_weight()
+        return healthy_sum      
 
     def get_sum_of_weights_of_neighbouring_neutral_nodes(self, node_1_id):
-    	neutral_neighbor_ids = self.get_neutral_neighbor_ids_of_a_node(node_1_id)
-    	weighted_sum = 0
-    	for i in neutral_neighbor_ids:
-    		weighted_sum = weighted_sum + self.graph[i].get_weight()
+        neutral_neighbor_ids = self.get_neutral_neighbor_ids_of_a_node(node_1_id)
+        weighted_sum = 0
+        for neighbor_node_id in neutral_neighbor_ids:
+            weighted_sum = weighted_sum + self.graph[neighbor_node_id].get_weight()
         return weighted_sum
-  
-
-    def get_neighbors_and_weights_of_a_node(self, node_id):
-        neighbor_and_weights = {}
-        if node_id not in self.graph:
-            print "node does not exist"
-        else:
-            for neighbor_node_id in self.graph[node_id].get_neighbor_node_ids():
-                neighbor_and_weights[neighbor_node_id] = self.graph[neighbor_node_id].weight
-
-            return neighbor_and_weights
-
-    def get_neighbor_objects_of_a_node(self, node_id):
-        neighbor_objects = []
-        if node_id not in self.graph:
-            print "node does not exist"
-        else:
-            for neighbor_node_id in self.graph[node_id].get_neighbor_node_ids():
-                neighbor_objects.append(self.graph[neighbor_node_id])
-
-            return neighbor_objects
 
     def get_neutral_neighbor_ids_of_a_node(self, node_id):
         neutral_neighbor_ids = []
@@ -129,8 +107,8 @@ class Graph(object):
             for neighbor_node_id in self.graph[node_id].get_neighbor_node_ids():
                 if not self.graph[neighbor_node_id].is_infected() and not self.graph[neighbor_node_id].is_vaccinated():
                     neutral_neighbor_ids.append(neighbor_node_id)
-
-            return neutral_neighbor_ids
+        
+        return neutral_neighbor_ids
 
     def vaccinate_node(self, node_id):
         if node_id not in self.graph:
@@ -150,7 +128,7 @@ class Graph(object):
                 if neighbor_id not in nodes_that_will_be_infected:
                     nodes_that_will_be_infected[neighbor_id] = self.graph[neighbor_id]
         if(len(nodes_that_will_be_infected) == 0):
-        	self.game_over = 1
+            self.game_over = 1
         return nodes_that_will_be_infected
 
     def play_one_step(self, vaccinate_node_id):
@@ -171,32 +149,22 @@ class Graph(object):
             if node_id not in self.infected_node_ids and node_id not in self.vaccinated_node_ids:
                 self.infected_node_ids.append(node_id)
                 self.graph[node_id].make_infected()
-
-
     
     def node_to_vaccinate(self):
-    	max_sum_weight = 0
-    	node_vaccinate = -1
-    	for node_id in self.propagator_nodes:
-    		node_l1 = self.get_neutral_neighbor_ids_of_a_node(node_id)
-    		for node_id_l1 in node_l1:
-			    if (max_sum_weight<self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1)) + self.graph[node_id_l1].get_weight():
-    				max_sum_weight = self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1) +self.graph[node_id_l1].get_weight()
-    				node_vaccinate = node_id_l1
+        max_sum_weight = 0
+        node_vaccinate = -1
+        for node_id in self.propagator_nodes:
+            node_l1 = self.get_neutral_neighbor_ids_of_a_node(node_id)
+            for node_id_l1 in node_l1:
+                if (max_sum_weight<self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1)) + self.graph[node_id_l1].get_weight():
+                    max_sum_weight = self.get_sum_of_weights_of_neighbouring_neutral_nodes(node_id_l1) +self.graph[node_id_l1].get_weight()
+                    node_vaccinate = node_id_l1
 
-    	return node_vaccinate 		    
+        return node_vaccinate
 
-                 
-
-    			
-
-    		
-
-
-
-# assigning node ids, weights and iterator variable for while loop
+# assigning node ids, weights and start of game play.
 node_ids = [1, 2, 3, 4, 5]
-weights = [10, 20, 30, 40, 50]
+weights = [10, 20, 30, 40, 30]
 i = 1
 
 # initialize a graph - the first infected node is randomly chosen.
@@ -204,31 +172,33 @@ graph = Graph(node_ids, weights)
 
 # get the id of the first infected node.
 first_infected_node = graph.get_infected_nodes()[0]
+# print the id of the first infected node.
 print "First infected node: ", first_infected_node
 
-#print "neutral neighbours ids", sum1
 # connections between nodes
-connections = [(1, 2), (2, 3), (3, 4), (1, 3), (1, 5), (2, 5)]
+connections = [(1, 3), (2, 3), (3, 4), (4, 5)]
+
 # create connections
 graph.add_connections(connections)
-#initializing the graph to draw
+
+#initializing the graph to draw, add the nodes and connections.
 g = nx.Graph()
 g.add_nodes_from(node_ids)
 g.add_edges_from(connections)
-#specifyin layout of appearence of nodes
+
+# Specify appearance of node.
 graph_pos = nx.shell_layout(g)
-# creating the graph to draw, adding edges and nodes (all blue) with initial edge conditions
+
+# Creating the graph to draw, adding edges and nodes (all blue) with initial edge conditions.
 nx.draw(g,graph_pos,with_labels=True,node_color='blue',node_size=500)
 plt.show()
-print "sum of weights of neighbours of first infected node", graph.get_sum_of_weights_of_neighbouring_neutral_nodes(first_infected_node)
-print "loop starting now... to proceed in the loop, close images after viewing them"
-print '\n' 
-# ------------- ADD THE WHILE LOOP HERE, AFTER THE CONNECTIONS---------------
+
+print "Close images to proceed."
+print '\n'
+
+# Start game play.
 while (len(graph.get_nodes_that_will_be_infected_in_next_step())):
-    print "step", i
     i = i+1 
-    print "Propagator nodes :",graph.propagator_nodes
-    print "infected nodes :" , graph.infected_node_ids
     id = graph.node_to_vaccinate()
     color_map = []                     #updating color map at each step of the loop
     for x in graph.graph.keys():
@@ -238,42 +208,9 @@ while (len(graph.get_nodes_that_will_be_infected_in_next_step())):
             color_map.append('green')    
     print "node to vaccinate :", id
     
+    # Update graph conditions.
     nx.draw(g,graph_pos,node_color=color_map,with_labels=True, node_size=500)
     plt.show()
-    print "sum of all healthy nodes before infection:", graph.get_sum_of_weights_of_all_healthy_nodes()	
     graph.play_one_step(id)
-print "\n game over, your score is", graph.get_sum_of_weights_of_all_healthy_nodes()
 
- # You can also print the sum of neutral nodes in the graph
-
-# get the ids of the nodes which will be infected in the next turn
-# graph.get_nodes_that_will_be_infected_in_next_step() returns the objects
-# of the nodes that will be infected.
-"""print "Nodes that will be infected: ", [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
-
-
-
-# out of the list of node ids returned above, we choose one node to vaccinate.
-# Chinu, Darshan will write the algo here.
-
-# For now choosing 1 if it is not the first infected node. If it is, choosing 2.
-# play_one_step will first vaccinate the given node id and then the infection will
-# spread to the neighboring nodes.
-if first_infected_node != 1:
-    print "Vaccinate node 1"
-    graph.play_one_step(1)
-    print "vaccinated status of node 1:", graph.graph[1].vaccinated
-else:
-    print "Vaccinate node 2"
-    graph.play_one_step(2)
-
-graph.play_one_step(3)
-# get the nodes infected after above step.
-print "Nodes infected after first step: ", graph.get_infected_nodes()
-
-# get the sum of weights of infected nodes.
-print "Sum of weights of infected nodes: ", graph.get_sum_of_weights_of_all_infected_nodes()
-
-# now which nodes will be effected. We have to choose one out of these to vaccinate.
-print "Nodes that will be affected in the second step: ", [node_id for node_id in graph.get_nodes_that_will_be_infected_in_next_step()]
-"""
+print "Sum of weights of healthy nodes saved:", graph.get_sum_of_weights_of_all_healthy_nodes()
