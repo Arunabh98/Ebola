@@ -2,6 +2,7 @@ import random
 import networkx as nx 
 import matplotlib.pyplot as plt 
 import copy
+import time
 
 class Node(object):
     def __init__(self, node_id, weight, ebola_infected = False, vaccinated = False):
@@ -44,12 +45,13 @@ class Node(object):
 
 
 class Graph(object):
-    def __init__(self, node_ids, weights, gane_over = 0):
+    def __init__(self, node_ids, weights, game_over = 0):
         # structure of graph {node_id: node_object, ...}
         self.graph = {}
         self.vaccinated_node_ids = []
         self.add_nodes(node_ids, weights)
-        first_infected_node_id = random.choice(self.graph.keys())
+        #first_infected_node_id = random.choice(self.graph.keys())
+        first_infected_node_id = 34;
         self.graph[first_infected_node_id].make_infected()
         self.infected_node_ids = [first_infected_node_id]
         self.propagator_nodes =[first_infected_node_id]
@@ -150,6 +152,25 @@ class Graph(object):
                     self.infected_node_ids.append(node_id)
                     self.graph[node_id].make_infected()
 
+    def node_to_vaccinate_alternate_alpha(self):
+        temporary_graph = copy.deepcopy(self)
+        values = {}
+        nodes_that_will_be_infected = temporary_graph.get_nodes_that_will_be_infected_in_next_step()
+        if len(nodes_that_will_be_infected) == 0:
+            return None, temporary_graph.get_sum_of_weights_of_all_healthy_nodes()
+        else:
+            for node_id in nodes_that_will_be_infected:
+                temporary_graph.play_one_step(node_id)
+                if temporary_graph.get_sum_of_weights_of_all_healthy_nodes()<12000:
+                    values[node_id] = 0
+                    next_node_to_save = None
+                else:
+                    next_node_to_save, values[node_id] = temporary_graph.node_to_vaccinate_alternate_alpha()
+                temporary_graph = copy.deepcopy(self)
+
+            max_value_key = max(values, key=values.get)
+            return max_value_key, values[max_value_key]
+
     def node_to_vaccinate_alternate(self):
         temporary_graph = copy.deepcopy(self)
         values = {}
@@ -178,8 +199,8 @@ class Graph(object):
         return node_vaccinate
 
 # assigning node ids, weights and start of game play.
-node_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-weights = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150]
+node_ids = [i for i in xrange(1,101)]
+weights = [i for i in xrange(10,1010,10)]
 
 # initialize a graph - the first infected node is randomly chosen.
 graph = Graph(node_ids, weights)
@@ -190,7 +211,7 @@ first_infected_node = graph.get_infected_nodes()[0]
 print "First infected node: ", first_infected_node
 
 # connections between nodes
-connections = [(3, 14), (12, 13), (12, 2), (10, 10), (10, 14), (13, 10), (4, 1), (13, 4), (12, 4), (9, 4), (13, 2), (12, 7), (9, 14), (12, 10), (4, 14), (12, 8), (4, 9), (6, 2), (10, 5), (6, 8)]
+connections = [(61, 66), (3, 83), (48, 99), (49, 56), (57, 86), (75, 99), (5, 46), (37, 49), (19, 35), (50, 88), (21, 43), (69, 93), (15, 42), (57, 70), (21, 93), (48, 90), (26, 48), (5, 67), (67, 86), (23, 76), (42, 88), (67, 93), (23, 51), (17, 58), (35, 86), (61, 68), (38, 40), (47, 68), (34, 40), (86, 92), (5, 77), (34, 56), (11, 80), (18, 80), (67, 73), (16, 78), (51, 98), (8, 68), (3, 21), (8, 13), (36, 38), (14, 58), (45, 66), (5, 86), (23, 46), (36, 65), (67, 89), (9, 90), (28, 94), (4, 57), (36, 48), (40, 99), (88, 100), (34, 69), (81, 90), (83, 96), (11, 40), (14, 42), (18, 30), (45, 58), (47, 86), (15, 26), (45, 59), (3, 29), (39, 41), (16, 83), (39, 73), (3, 6), (33, 93), (18, 40), (30, 98), (35, 90), (55, 71), (20, 65), (10, 77), (37, 58), (41, 65), (45, 100), (55, 84), (23, 85), (77, 89), (8, 34), (5, 35), (19, 77), (7, 61), (23, 80), (69, 82), (4, 59), (39, 94), (17, 79), (16, 17), (1, 59), (90, 91), (2, 28), (31, 51), (23, 40), (43, 72), (31, 85), (76, 92), (31, 63)]
 
 # create connections
 graph.add_connections(connections)
@@ -204,36 +225,43 @@ g.add_edges_from(connections)
 graph_pos = nx.shell_layout(g)
 
 # Creating the graph to draw, adding edges and nodes (all blue) with initial edge conditions.
-nx.draw(g,graph_pos,with_labels=True,node_color='blue',node_size=500)
+nx.draw(g,graph_pos,with_labels=True,node_color='green',node_size=50)
 plt.show()
 
 print "Close images to proceed."
 print '\n'
 
+
 # Start game play.
 while (len(graph.get_nodes_that_will_be_infected_in_next_step())):
     # id = graph.node_to_vaccinate()
+    start_time = time.time() 
     id = graph.node_to_vaccinate_alternate()[0]
-    color_map = []                     #updating color map at each step of the loop
-    for x in graph.graph.keys():
-        if graph.graph[x].is_infected():
-            color_map.append('red')
-        else:
-            color_map.append('green')    
-    print "node to vaccinate :", id
+    print "Time elapsed : " + str(time.time()-start_time)
+    #color_map = []                     #updating color map at each step of the loop
+    #for x in graph.graph.keys():
+    #    if graph.graph[x].is_infected():
+    #        color_map.append('red')
+    #    elif graph.graph[x].is_vaccinated():
+    #        color_map.append('blue')
+    #    else:
+    #        color_map.append('green')    
+    #print "node to vaccinate :", id
     
     # Update graph conditions.
-    nx.draw(g,graph_pos,node_color=color_map,with_labels=True, node_size=500)
-    plt.show()
+    #nx.draw(g,graph_pos,node_color=color_map,with_labels=True, node_size=500, ax=ax)
+    #plt.show()
     graph.play_one_step(id)
 
 graph.play_one_step()
 color_map = []
 for x in graph.graph.keys():
     if graph.graph[x].is_infected():
-        color_map.append('red')
+       color_map.append('red')
+    elif graph.graph[x].is_vaccinated():
+        color_map.append('blue')
     else:
-        color_map.append('green')
-nx.draw(g,graph_pos,node_color=color_map,with_labels=True, node_size=500)
+        color_map.append('green') 
+nx.draw(g,graph_pos,node_color=color_map,with_labels=True, node_size=50)
 plt.show()
 print "Sum of weights of healthy nodes saved:", graph.get_sum_of_weights_of_all_healthy_nodes()
